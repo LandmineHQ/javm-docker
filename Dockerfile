@@ -7,8 +7,11 @@ LABEL description="JAVM Docker image with pre-installed Java 8/17/21/25"
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
 
-# Install system packages
-RUN apt-get update && apt-get install -y \
+# 显式将默认 Shell 设置为 bash
+SHELL ["/bin/bash", "-c"]
+
+# 1. 安装系统依赖（使用 apt 且保留缓存）
+RUN apt update && apt install -y --no-install-recommends \
     wget \
     curl \
     vim \
@@ -17,30 +20,25 @@ RUN apt-get update && apt-get install -y \
     libcurl4 \
     ca-certificates
 
-# Install javm (install script automatically configures .bashrc)
+# 2. 安装 javm
 RUN curl -fsSL https://javm.dev/install.sh | bash
 
-# Add javm binary to PATH for subsequent RUN commands
-# (RUN uses /bin/sh which doesn't source .bashrc)
+# 3. 将 javm 二进制文件加入 PATH
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Pre-install Java versions using Temurin
+# 4. 初始化 shell 环境（追加到 ~/.bashrc，供最终交互式使用）
+RUN javm init bash >> ~/.bashrc
+
+# 5. 安装各版本的 Java（依赖前面的 ENV PATH，直接调用 javm 即可）
 RUN javm install temurin@8 && \
     javm install temurin@17 && \
     javm install temurin@21 && \
     javm install temurin@25
 
-# Set Java 25 as default
+# 6. 设置默认 Java 版本
 RUN javm default temurin@25
 
-# Generate non-interactive shell integration script (without auto-use default)
-# This enables "javm use" in bash -c and scripts without resetting version in child shells
-RUN javm init bash | grep -v '^javm use' > /etc/profile.d/javm.sh
-
-# Enable javm function in non-interactive bash (bash -c, entrypoint scripts)
-ENV BASH_ENV="/etc/profile.d/javm.sh"
-
-# Create workspace
+# 创建工作目录
 RUN mkdir -p /workspace
 WORKDIR /workspace
 
