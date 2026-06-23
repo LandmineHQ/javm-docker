@@ -17,12 +17,12 @@ RUN apt-get update && apt-get install -y \
     libcurl4 \
     ca-certificates
 
-# Install javm
+# Install javm (install script automatically configures .bashrc)
 RUN curl -fsSL https://javm.dev/install.sh | bash
 
-# Add javm to PATH and configure shell integration
+# Add javm binary to PATH for subsequent RUN commands
+# (RUN uses /bin/sh which doesn't source .bashrc)
 ENV PATH="/root/.local/bin:${PATH}"
-RUN echo 'eval "$(javm init bash)"' >> /root/.bashrc
 
 # Pre-install Java versions using Temurin
 RUN javm install temurin@8 && \
@@ -32,6 +32,13 @@ RUN javm install temurin@8 && \
 
 # Set Java 25 as default
 RUN javm default temurin@25
+
+# Generate non-interactive shell integration script (without auto-use default)
+# This enables "javm use" in bash -c and scripts without resetting version in child shells
+RUN javm init bash | grep -v '^javm use' > /etc/profile.d/javm.sh
+
+# Enable javm function in non-interactive bash (bash -c, entrypoint scripts)
+ENV BASH_ENV="/etc/profile.d/javm.sh"
 
 # Create workspace
 RUN mkdir -p /workspace
