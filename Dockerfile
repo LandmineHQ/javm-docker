@@ -3,9 +3,11 @@ FROM debian:trixie
 LABEL maintainer="javm"
 LABEL description="JAVM Docker image with pre-installed Java 8/17/21/25"
 
-# Set non-interactive mode and timezone
+# Set non-interactive mode, timezone, and locale (fixes htop character display issues)
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Shanghai
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 
 # 显式将默认 Shell 设置为 bash
 SHELL ["/bin/bash", "-c"]
