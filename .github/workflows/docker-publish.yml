@@ -46,10 +46,10 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
-            # Set latest tag for default branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Use preview tag for non-release pushes (overwrites each time)
+            # preview tag for dev pushes to main (overwrites each time)
             type=raw,value=preview,enable={{is_default_branch}}
+            # latest tag only on version tags (v*)
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             # Tag with semver (v1.0.0 -> 1.0.0, 1.0)
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
