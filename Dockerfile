@@ -21,8 +21,7 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://javm.dev/install.sh | bash
 
 # Add javm to PATH and configure shell integration
-ENV JAVM_DIR="/root/.javm"
-ENV PATH="${JAVM_DIR}/bin:${PATH}"
+ENV PATH="/root/.local/bin:${PATH}"
 RUN echo 'eval "$(javm init bash)"' >> /root/.bashrc
 
 # Pre-install Java versions using Temurin
@@ -31,8 +30,8 @@ RUN javm install temurin@8 && \
     javm install temurin@21 && \
     javm install temurin@25
 
-# Set Java 21 as default
-RUN javm default temurin@21
+# Set Java 25 as default
+RUN javm default temurin@25
 
 # Create workspace
 RUN mkdir -p /workspace
