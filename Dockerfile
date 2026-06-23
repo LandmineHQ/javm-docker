@@ -1,7 +1,7 @@
-FROM debian:trixie
+FROM ubuntu:24.04
 
 LABEL maintainer="javm"
-LABEL description="JAVM Docker image with pre-installed Java 8/17/21/25"
+LABEL description="JAVM Docker image with pre-installed Java 8/17/21/25 on Ubuntu 24.04"
 
 # Set non-interactive mode, timezone, and locale (fixes htop character display issues)
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,7 +20,8 @@ RUN apt update && apt install -y --no-install-recommends \
     nano \
     p7zip-full \
     libcurl4 \
-    ca-certificates
+    ca-certificates \
+    ncurses-term
 
 # 2. 安装 javm
 RUN curl -fsSL https://javm.dev/install.sh | bash
